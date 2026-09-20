@@ -16,7 +16,8 @@ and restores the modification times (some start-up checks compare them). data_ma
 
 Never packaged: .git, .auth (a credential that only this Windows account can decrypt), devvvv (a separate project with its
 own repository), .tools, node_modules, __pycache__, logs, lock files, SQLite -shm files, server.json, .digest_cache.json.
-If the repository is public, units whose licence forbids redistribution are held back and listed; nothing else changes.
+If the repository is public, units whose licence forbids redistribution are held back and listed unless the owner passes
+--include-restricted; nothing else changes.
 """
 from __future__ import annotations
 
@@ -360,6 +361,8 @@ def push(arguments):
         leftover.unlink()
     visibility = run(['gh', 'repo', 'view', REPO, '--json', 'visibility', '-q', '.visibility']).stdout.strip() or 'UNKNOWN'
     log('repository %s is %s' % (REPO, visibility))
+    if visibility != 'PRIVATE' and arguments.include_restricted:
+        log('OWNER OVERRIDE: restricted units are uploaded although the repository is %s' % visibility)
     for tag in (TAG, TAG + '-courtdocs'):
         if run(['gh', 'release', 'view', tag, '--repo', REPO]).returncode != 0:
             notes = 'Data archives for the legal archive. Restore with `python bootstrap.py pull`; see TRANSFER.md. Parts are verified by SHA-256.'
@@ -376,7 +379,7 @@ def push(arguments):
         if arguments.skip_external and row['key'].startswith('external/'):
             held[row['name']] = 'external originals skipped on request'
             continue
-        if visibility != 'PRIVATE' and row['restricted']:
+        if visibility != 'PRIVATE' and row['restricted'] and not arguments.include_restricted:
             held[row['name']] = 'held: licence forbids redistribution and the repository is not private'
             log('HELD %s (%s)' % (row['key'], held[row['name']]))
             continue
@@ -429,6 +432,7 @@ def main():
     parser.add_argument('command', choices=('plan', 'push', 'status'))
     parser.add_argument('--only', action='append', help='package only units whose key contains this text (repeatable)')
     parser.add_argument('--part-mb', type=int, default=128)
+    parser.add_argument('--include-restricted', action='store_true', help='owner decision: upload units whose licence forbids redistribution even though the repository is not private')
     parser.add_argument('--skip-external', action='store_true', help='leave out the court-document originals that live outside the project')
     arguments = parser.parse_args()
     if arguments.command == 'plan':

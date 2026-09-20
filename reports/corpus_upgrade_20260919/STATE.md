@@ -334,3 +334,37 @@ Round 9 (2026-09-20, open-source enrichment, done without sub-agents):
 - Owner actions still open: revoke the GitHub token that is embedded in that repository's remote address; decide whether the
   profile-level repository should exist; SCRAPE needs its own `git init` if it is to be versioned.
 - The two hidden downloaders can be relaunched now (the memory problem was unrelated to them).
+
+## Update (2026-09-20 ~11:40Z) — round 10: footer pages retired; project pushed to GitHub (code in git, data in releases)
+- Footer tabs removed with their data (`wire_round10_footer_tabs.py`): "Data downloads" (#datasets, /api/datasets) and
+  "Collection status" (#library, the `datasets` + `live` blocks of /api/summary, `live_jobs()`). Old links open Home. Three tests
+  updated. Live verifier still 83/83. Main database not rebuilt.
+- SCRAPE is now its own git repository (branch main) -> https://github.com/fshahersw/externalcorpus (PRIVATE; the owner chose
+  "make it private, push all" after being told it was public). Repo-local identity = the owner's GitHub no-reply address. Repo-local
+  `http.version=HTTP/1.1` because pushes over HTTP/2 failed with a TLS integrity error on this machine.
+- Git = code only (~1,075 files, 5 MB): `.gitignore` prunes whole data folders (so `git status` takes 2 s and the desktop app's poll
+  cannot start another directory walk), `.gitattributes` = `* -text` (byte-exact checkouts; small files are hash-checked at start-up).
+- Data = release assets, written by `tools/push_data.py`, restored by `bootstrap.py` (both standard library; how-to in TRANSFER.md):
+  93 units / 274,815 files / 130.1 GB raw = the whole project minus git-tracked files + the 43 GB of court-document originals the
+  index names under SW-BULK (restored under `external/`, where `court_documents.py` now looks first). Deterministic tar(.gz) streams
+  cut into 128 MB parts; each archive ends with a per-file listing (path, size, mtime_ns, SHA-256); `data_manifest.json` (asset,
+  refreshed after every unit) lists units, parts, licence lines. Court documents use release `data-20260920-courtdocs` (1,000-asset limit).
+- Verified end to end: fresh clone + `bootstrap.py pull` of two units = 1,269 files byte-identical to the originals, nanosecond
+  times restored; `tools/test_transfer_roundtrip.py` (offline, 6 tests) also proves a damaged part is refused.
+- Never packaged: .auth (DPAPI credential), devvvv (separate project/repo), .tools, node_modules, __pycache__, logs, locks, -shm.
+  `tools/scan_secrets.py git` must print 0 before every code push (it did); the full-tree scan log is in reports/hosting_plan_20260920/.
+- NETWORK FAULT on this machine: about 1 upload in 15 dies with `tls: bad record MAC` (and git's `SEC_E_MESSAGE_ALTERED`): bytes are
+  being altered between this PC and the internet. TLS refuses them and retries succeed, so nothing damaged is stored, but the
+  adapter/driver/router should be looked at by the owner (assistant does not change adapter settings).
+- Upload runs hidden (`tools/start_push.ps1`, log `_transfer_scratch/push.log`, resumable). After it ends: rebuild
+  `sources/source_directory_documents_20260919`, then `citation_index build.py scan` + `build.py`, run `push_data.py push` again
+  (only changed units are re-packaged), commit `data_manifest.json`.
+- Owner statement recorded: seeger / SW-BULK folders are the owner's own collections from public sources; the older "private firm
+  work product" labels inside validation.json files are unchanged because start-up gates read them (relabel = separate task).
+- Credential scan of all 196,990 non-compressed data files (`tools/scan_secrets.py tree`, then `tools/explain_secret_hits.py`): 27 files
+  flagged, 84 strings, every one explained and none is the owner's: 29+ URL slugs that begin "sk-" (njcourts.gov opinion URLs,
+  docket-vendor case URLs), 14 access-key IDs inside third parties' signed download links, one Amazon product-link SubscriptionId in
+  a CPSC recall record, one S3 bucket path in a scraped agency URL. No Firecrawl keys, GitHub tokens, authorization headers or
+  private keys anywhere. Logs: reports/hosting_plan_20260920/secret_scan_tree.log and secret_hits_explained.log.
+- 12:15Z collector for source_directory_documents ended (time budget; 999 saved, 291 pending). Rebuilt its index and the citation
+  index (946 new documents; 25,235 scanned, 60,616 authorities, 0 failures). Live verifier 83/83.

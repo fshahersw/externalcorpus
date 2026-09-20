@@ -36,12 +36,15 @@
 !/delivery/**/README.md
 !/delivery/archive-directory/**
 
-# --- loose data files at the top level
-/*.parquet
-/*.html
-/*.pdf
-/*.docx
-/*.xlsx
+# --- loose files at the top level are data (they travel in the release) unless they are code or write-ups
+/*.*
+!/*.md
+!/*.py
+!/.gitignore
+!/.gitattributes
+!/requirements.txt
+!/data_manifest.json
+!/.claude/
 
 # --- machine state, caches and databases, everywhere
 node_modules/

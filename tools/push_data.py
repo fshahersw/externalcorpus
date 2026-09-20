@@ -300,15 +300,22 @@ def package(row, part_bytes, on_part):
     return len(lines), total, skipped, hashlib.sha256(listing).hexdigest()
 
 
-def upload(path):
-    for attempt in range(1, 7):
+def tag_of(row):
+    """A release holds at most 1,000 assets, so the court-document originals get a release of their own."""
+    return TAG + '-courtdocs' if row['key'].startswith('external/') else TAG
+
+
+def upload(path, tag=TAG):
+    # The uplink of the collecting machine corrupts roughly one TLS record per 500 MB ("bad record MAC"): TLS refuses the
+    # transfer, nothing damaged is ever accepted, and a retry succeeds. Parts are therefore small and retries quick.
+    for attempt in range(1, 13):
         started = time.time()
-        result = run(['gh', 'release', 'upload', TAG, str(path), '--repo', REPO, '--clobber'])
+        result = run(['gh', 'release', 'upload', tag, str(path), '--repo', REPO, '--clobber'])
         if result.returncode == 0:
             return time.time() - started
         log('upload attempt %d failed for %s: %s' % (attempt, path.name, (result.stderr or result.stdout).strip()[-300:]))
-        time.sleep(min(600, 30 * attempt * attempt))
-    raise RuntimeError('upload failed six times: ' + path.name)
+        time.sleep(min(300, 5 * 2 ** (attempt - 1)))
+    raise RuntimeError('upload failed twelve times: ' + path.name)
 
 
 def process_mentions(fragment):
@@ -334,7 +341,7 @@ def write_manifest(plan, state, visibility, held):
     for row in plan:
         done = state.get(row['name']) or {}
         units.append({key: row[key] for key in ('key', 'name', 'mode', 'files', 'bytes', 'license_ref', 'export_allowed', 'restricted', 'optional')}
-                     | {'uploaded': bool(done.get('complete')), 'parts': done.get('parts') or [], 'packed_bytes': sum(part['bytes'] for part in done.get('parts') or []),
+                     | {'release_tag': tag_of(row), 'uploaded': bool(done.get('complete')), 'parts': done.get('parts') or [], 'packed_bytes': sum(part['bytes'] for part in done.get('parts') or []),
                         'file_listing_sha256': done.get('listing_sha256'), 'skipped_files': done.get('skipped') or [], 'held': held.get(row['name'])})
     commit = run(['git', '-C', str(ROOT), 'rev-parse', 'HEAD']).stdout.strip() or None
     manifest = {'schema_version': 1, 'repository': REPO, 'release_tag': TAG, 'repository_visibility_when_written': visibility, 'written_at': datetime.now(timezone.utc).isoformat(),
@@ -349,13 +356,16 @@ def write_manifest(plan, state, visibility, held):
 
 def push(arguments):
     SCRATCH.mkdir(exist_ok=True)
+    for leftover in (SCRATCH / 'parts').glob('*'):
+        leftover.unlink()
     visibility = run(['gh', 'repo', 'view', REPO, '--json', 'visibility', '-q', '.visibility']).stdout.strip() or 'UNKNOWN'
     log('repository %s is %s' % (REPO, visibility))
-    if run(['gh', 'release', 'view', TAG, '--repo', REPO]).returncode != 0:
-        notes = 'Data archives for the legal archive. Restore with `python bootstrap.py pull`; see TRANSFER.md. Parts are verified by SHA-256.'
-        created = run(['gh', 'release', 'create', TAG, '--repo', REPO, '--title', 'Data archives ' + TAG, '--notes', notes, '--latest=false'])
-        if created.returncode != 0:
-            raise SystemExit('could not create the release: ' + created.stderr.strip())
+    for tag in (TAG, TAG + '-courtdocs'):
+        if run(['gh', 'release', 'view', tag, '--repo', REPO]).returncode != 0:
+            notes = 'Data archives for the legal archive. Restore with `python bootstrap.py pull`; see TRANSFER.md. Parts are verified by SHA-256.'
+            created = run(['gh', 'release', 'create', tag, '--repo', REPO, '--title', 'Data archives ' + tag, '--notes', notes, '--latest=false'])
+            if created.returncode != 0:
+                raise SystemExit('could not create the release: ' + created.stderr.strip())
     plan = build_plan()
     state, held = load_state(), {}
     part_bytes = arguments.part_mb * MB
@@ -383,12 +393,12 @@ def push(arguments):
         known = {part['name']: part for part in previous.get('parts') or []}
         parts = []
 
-        def on_part(path, index, size, digest, known=known, parts=parts):
+        def on_part(path, index, size, digest, known=known, parts=parts, tag=tag_of(row)):
             old = known.get(path.name)
             if old and old.get('sha256') == digest and old.get('bytes') == size and old.get('uploaded'):
                 log('part already uploaded, unchanged: %s' % path.name)
             else:
-                seconds = upload(path)
+                seconds = upload(path, tag)
                 log('uploaded %s  %.0f MB in %.0f s (%.1f MB/s)' % (path.name, size / MB, seconds, size / MB / max(seconds, 0.1)))
             parts.append({'name': path.name, 'bytes': size, 'sha256': digest, 'uploaded': True})
             state[row['name']] = {'key': row['key'], 'complete': False, 'parts': parts}
@@ -418,7 +428,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     parser.add_argument('command', choices=('plan', 'push', 'status'))
     parser.add_argument('--only', action='append', help='package only units whose key contains this text (repeatable)')
-    parser.add_argument('--part-mb', type=int, default=512)
+    parser.add_argument('--part-mb', type=int, default=128)
     parser.add_argument('--skip-external', action='store_true', help='leave out the court-document originals that live outside the project')
     arguments = parser.parse_args()
     if arguments.command == 'plan':

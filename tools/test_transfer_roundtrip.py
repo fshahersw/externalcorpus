@@ -45,7 +45,7 @@ class Stored(unittest.TestCase):
         bootstrap.ROOT = WORK / 'root'
         bootstrap.SCRATCH = WORK / 'scratch'
         bootstrap.LISTINGS = WORK / 'scratch' / 'listings'
-        bootstrap.fetch = lambda name, target: (target.parent.mkdir(parents=True, exist_ok=True), shutil.copyfile(WORK / 'kept' / name, target))
+        bootstrap.fetch = lambda name, target, tag=None: (target.parent.mkdir(parents=True, exist_ok=True), shutil.copyfile(WORK / 'kept' / name, target))
         cls.unit = {'key': cls.UNIT_KEY, 'name': cls.row['name'], 'mode': cls.row['mode'], 'parts': cls.parts, 'file_listing_sha256': cls.listing_sha}
 
     def test_1_stream_is_cut_into_several_parts(self):

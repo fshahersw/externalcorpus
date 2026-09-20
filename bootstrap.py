@@ -50,21 +50,21 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
         return None
 
 
-def fetch(name, target):
+def fetch(name, target, tag=TAG):
     """Downloads one release asset to `target`."""
     target.parent.mkdir(parents=True, exist_ok=True)
     if have_gh():
-        result = subprocess.run(['gh', 'release', 'download', TAG, '--repo', REPO, '--pattern', name, '--dir', str(target.parent), '--clobber'], capture_output=True, text=True)
+        result = subprocess.run(['gh', 'release', 'download', tag, '--repo', REPO, '--pattern', name, '--dir', str(target.parent), '--clobber'], capture_output=True, text=True)
         if result.returncode != 0:
             raise RuntimeError('gh could not download %s: %s' % (name, result.stderr.strip()[-300:]))
         return
     token = os.environ.get('GH_TOKEN') or os.environ.get('GITHUB_TOKEN')
     if not token:
-        with urllib.request.urlopen('https://github.com/%s/releases/download/%s/%s' % (REPO, TAG, name)) as response, open(target, 'wb') as handle:
+        with urllib.request.urlopen('https://github.com/%s/releases/download/%s/%s' % (REPO, tag, name)) as response, open(target, 'wb') as handle:
             shutil.copyfileobj(response, handle, BLOCK)
         return
     headers = {'Authorization': 'Bearer ' + token, 'X-GitHub-Api-Version': '2022-11-28'}
-    request = urllib.request.Request('https://api.github.com/repos/%s/releases/tags/%s' % (REPO, TAG), headers=headers)
+    request = urllib.request.Request('https://api.github.com/repos/%s/releases/tags/%s' % (REPO, tag), headers=headers)
     with urllib.request.urlopen(request) as response:
         assets = {asset['name']: asset['url'] for asset in json.load(response)['assets']}
     if name not in assets:
@@ -93,8 +93,8 @@ def sha256_of(path):
 class PartChain:
     """Reads a unit's parts as one stream, fetching and verifying each part only when the previous one is used up."""
 
-    def __init__(self, parts, keep):
-        self.parts, self.keep, self.position, self.handle, self.path = list(parts), keep, 0, None, None
+    def __init__(self, parts, keep, tag=TAG):
+        self.parts, self.keep, self.tag, self.position, self.handle, self.path = list(parts), keep, tag, 0, None, None
 
     def _next(self):
         if self.handle is not None:
@@ -108,7 +108,7 @@ class PartChain:
         self.position += 1
         self.path = SCRATCH / 'parts' / part['name']
         if not (self.path.is_file() and self.path.stat().st_size == part['bytes'] and sha256_of(self.path) == part['sha256']):
-            fetch(part['name'], self.path)
+            fetch(part['name'], self.path, self.tag)
         if self.path.stat().st_size != part['bytes'] or sha256_of(self.path) != part['sha256']:
             raise RuntimeError('part does not match its recorded SHA-256: ' + part['name'])
         print('   part %d/%d verified  %s' % (self.position, len(self.parts), part['name']), flush=True)
@@ -146,7 +146,7 @@ def safe_target(name):
 
 
 def install(unit, keep):
-    chain = PartChain(unit['parts'], keep)
+    chain = PartChain(unit['parts'], keep, unit.get('release_tag') or TAG)
     stream = gzip.GzipFile(fileobj=chain, mode='rb') if unit['mode'] == 'tar.gz' else chain
     written, listing = {}, None
     with tarfile.open(fileobj=stream, mode='r|') as archive:

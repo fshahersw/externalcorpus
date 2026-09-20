@@ -28,7 +28,7 @@ unit) lists the units with their size, licence line, parts and SHA-256 values, s
 `pull` is resumable. It checks each part against its SHA-256 before unpacking, hashes every file while writing it, compares it
 with the listing carried inside the archive, and restores modification times to the nanosecond (the state-code outline checks the
 28 GB law catalogue by size and time instead of re-hashing it on every start). `python bootstrap.py verify` re-hashes what is installed.
-Disk needed: about 135 GB for everything, 90 GB with `--skip-optional`. Scratch space stays below one part (512 MB).
+Disk needed: about 135 GB for everything, 90 GB with `--skip-optional`. Scratch space stays below one part (128 MB).
 
 Windows: enable long paths once (`git config --system core.longpaths true`, and the LongPathsEnabled policy) because some saved
 files sit deeper than 260 characters. `.gitattributes` turns off end-of-line conversion; keep it that way, since several small files

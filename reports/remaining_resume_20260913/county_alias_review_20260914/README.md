@@ -1,0 +1,9 @@
+# Offline county canonical-alias review
+
+This package reviews saved robots-origin and page HTTP Location evidence from the two current county continuation collections. It makes no network requests, ingests no seeds, and changes no corpus databases or configs. `scope.json` and the current RUNBOOK were read first; source locks were independently available while historical unfinished run rows remained untouched.
+
+`seeds.jsonl` contains only previously unrecorded exact www/apex aliases preserving the requested source path and query. Separate per-source seed/config files support later ingestion into the corresponding existing collection. Proposed configs use eight workers, shared host coordination, no link following, depth zero, no retries, and exact selected target hosts. These configs are review artifacts, not live settings.
+
+Robots-derived seeds use `derived_county_entry_from_observed_robots_redirect_origin`; their entry URL was not observed as a page link. Actual HTTP Location seeds use `observed_county_entry_from_same_domain_http_redirect`, with exact metadata, raw response and Location hashes. Both retain the original entry, original reported href where present, source collection/resource/context IDs, and full parent seed provenance. CISA registry records, registered domains and unreviewed county hints remain distinct from Trellis-reported websites.
+
+Read `summary.json`, `decisions.jsonl`, `all_redirects_reviewed.jsonl`, `all_verified_candidates.jsonl`, and `validation.json` before acquisition. Any future collector must still pass fresh destination robots and existing host policies. Only the precise source redirect control is derivation evidence; no unrelated barrier was ignored or removed. Previously captured, attempted, pending, and selected target URLs were excluded. This does not establish full county coverage or government ownership.

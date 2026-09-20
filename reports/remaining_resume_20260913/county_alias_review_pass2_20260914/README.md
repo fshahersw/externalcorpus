@@ -1,0 +1,11 @@
+# Offline county redirect delta review
+
+No new acquisition endpoints qualify. The 15 newly unresolved rows since the frozen first review contain 13 actual HTTP Location redirects: 12 destinations already downloaded and one already returned 403. Two further robots chains leave the registered county domain for external Revize CMS hosts. No entry URL was derived from those external hosts.
+
+`new_redirects_reviewed.jsonl` retains literal Locations, complete robots response chains, raw and metadata hashes, source fetch-row hashes, namespaced contexts, original registered domains and unreviewed geography hints. Actual HTTP evidence remains distinct from robots-origin evidence. `excluded_endpoints.jsonl` provides compact decisions; `remaining_gaps.jsonl` preserves the Rooks 403, two external CMS robots gaps, and the pre-existing Leon pending/forbidden-host gap. The held washingtoncopa.gov ancestral association is preserved separately and excluded from both selection and the new-redirect denominator.
+
+`seeds.jsonl` and `candidate_seeds.jsonl` are intentionally empty. `proposed_additive_config.json` is a no-op proposal, not a replacement crawler config. Do not ingest, launch, reset, or retry anything for this package. Existing source databases, configs, controls, archive captures, index and delivery were not modified. No network requests were made.
+
+The review compares prior resource IDs/status/fetches and existing saved robots-control hashes. It checks exact URLs against all generic corpus resource states, the shared host coordinator, saved catalog records, and prior county seed/staging manifests. Locks and process observations distinguish stopped collectors from historical unfinished run rows. Scope/RUNBOOK receipts are start-of-review observations because root may publish concurrently.
+
+`validation.json`, `validated_file_references.jsonl`, `deduplication_inputs.json`, source snapshots and `output_manifest.json` are the audit trail. This exhausts only the specified saved-redirect delta, not the nationwide county corpus. The immutable report can be reproduced in a new review directory after adjusting its explicit snapshot guard; do not rerun over this frozen directory.

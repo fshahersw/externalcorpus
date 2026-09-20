@@ -1,0 +1,22 @@
+{
+  "allow": [
+    {"host": "trellis.law", "path_prefixes": ["/state-rules", "/coverage", "/judges", "/judge"]},
+    {"host": "www.cockecountytn.gov", "path_prefixes": ["/"]}
+  ],
+  "workers": 3,
+  "per_host_delay": 2.0,
+  "timeout_seconds": 30,
+  "max_transfer_seconds": 180,
+  "max_response_bytes": 67108864,
+  "max_extract_chars": 20971520,
+  "min_free_bytes": 2147483648,
+  "max_depth": 12,
+  "max_retries": 2,
+  "backoff_base_seconds": 30,
+  "max_backoff_seconds": 3600,
+  "respect_robots": true,
+  "follow_links": true,
+  "follow_external_allowed_links": false,
+  "pause_host_on_access_block": true,
+  "user_agent": "LegalCorpusResearch/1.0"
+}

@@ -1,0 +1,19 @@
+# Focused county delivery
+
+This offline package contains all **3,144 saved Census county-equivalent rows** across the 50 states and DC (saved vintage 2026). It is a geography and evidence lookup, not a claim that every county's court records or website has been collected.
+
+`counties.csv` and `counties.jsonl` contain one row per GEOID, with state/name, saved Trellis profile status and links, reported website evidence, separately labeled registry candidates, and existing raw/text paths. Treat GEOID and FIPS fields as strings so leading zeros survive. Nested CSV values are JSON; JSONL preserves them directly. All source paths are relative to the workspace root, so retain this delivery within the workspace or preserve that directory layout when moving it.
+
+The saved reconciliation supplies **1,421 clear Trellis matches**, **2 ambiguous profiles**, and **10 special jurisdictions**. The other **1,723** Census geographies have no clear saved Trellis match; 2 have an ambiguous candidate. Missing means not matched in this snapshot. It does not mean the county is absent from Trellis or the government.
+
+`special_jurisdictions` preserves historical county court scopes and non-county jurisdictions separately. `ambiguities` preserves every conflicting profile in the current geography snapshot, including the earlier Florida Jackson/Washington and Sarasota/Manatee conflicts. Neither table assigns a Census GEOID.
+
+`website_evidence` preserves 1,384 Trellis Website-field observations and 2,676 official CISA domain registrations. Trellis name matching does not verify site ownership. CISA registration verifies a government-domain registration; its saved county-name hints remain unreviewed candidates. Unassigned and ambiguous website evidence remains in `unassigned_website_evidence`. No candidate is forced into a confirmed county match.
+
+`captures` references 3,147 existing saved captures without copying their contents. Website captures are associated through a recorded collector seed context or an exact source URL. Reviewed apex/www entries derived from robots redirects retain an explicit derived relation, original href, new seed URL, and source control/response hashes; they are not labeled as observed page hrefs. An off-host redirect remains explicit in the website's capture references and does not verify county authority. Pending, denied and failed collector states remain status counts, not saved legal text.
+
+Separate offline text derivatives, when present, are listed in `summary.json` under `offline_text_derivative_manifests`. The [Crawford County decoding manifest](../../../corpus/county_entries_resume_20260913/offline_decoding/manifest.jsonl) links its recovered text outside the unified FTS index; original compressed capture bytes and extraction metadata remain preserved.
+
+`state_summary`, `summary.json`, `schema.json`, `provenance.json`, `validation.json` and `file_references` describe counts, keys, inputs and validation. The county snapshot files preserve the compact resource/context rows used for this read-only join. The joined collections are `corpus/county_sites`, `corpus/county_entries_resume_20260913`, `corpus/county_entries_continuation_20260913`, `corpus/county_registry_continuation_20260913`; numeric resource IDs are namespaced by collection, and shared-URL geography context IDs remain visible. Source captures, databases, queues and credentials are unchanged.
+
+Build again with `python scripts/build_focused_counties.py`. Row ordering, IDs and joins are deterministic for the same saved inputs; timestamps identify the build and the input fingerprint distinguishes later snapshots. This build used no network or browser requests. Validation checked all 3,144 unique GEOIDs, FIPS consistency, the 10+2 unresolved rows, evidence ID joins, and 8,010 source-file references and hashes. File-reference issues: **0**.

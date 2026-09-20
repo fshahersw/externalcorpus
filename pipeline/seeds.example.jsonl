@@ -1,0 +1,5 @@
+{"url":"https://trellis.law/state-rules","source_family":"trellis","jurisdiction":{"country":"US"},"category":"state_rules_index","discovered_from":"user"}
+{"url":"https://trellis.law/judges","source_family":"trellis","jurisdiction":{"country":"US"},"category":"judges_index","discovered_from":"user"}
+{"url":"https://trellis.law/coverage/arizona","source_family":"trellis","jurisdiction":{"country":"US","state":"Arizona"},"category":"coverage","discovered_from":"user","scope":{"host":"trellis.law","path_prefixes":["/coverage/arizona"]}}
+{"url":"https://trellis.law/coverage/tennessee/cocke","source_family":"trellis","jurisdiction":{"country":"US","state":"Tennessee","county":"Cocke"},"category":"county_coverage","discovered_from":"user","scope":{"host":"trellis.law","path_prefixes":["/coverage/tennessee/cocke"]}}
+{"url":"https://www.cockecountytn.gov/","source_family":"official_county","jurisdiction":{"country":"US","state":"Tennessee","county":"Cocke"},"category":"county_government","discovered_from":"https://trellis.law/coverage/tennessee/cocke"}

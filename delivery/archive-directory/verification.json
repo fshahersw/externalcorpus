@@ -1,0 +1,27 @@
+{
+  "verified_at": "2026-09-18T18:05:53.585699+00:00",
+  "integration_tests": {
+    "passed": 10,
+    "failed": 0,
+    "elapsed_seconds": 8.324,
+    "command": "Python311/python.exe delivery/archive-directory/test_directory.py"
+  },
+  "browser_checks": [
+    "desktop overview rendered",
+    "390px mobile layout rendered; no page overflow",
+    "full-text search due process returned698 published matches",
+    "Cocke County drilldown returned3saved associatedrecords",
+    "Sabraw displayed449source-reported analysisrecords with fulltext/provenance",
+    "dataset exportlinks expanded",
+    "browser console errors absent in final check"
+  ],
+  "http_delivery": "Negotiated gzip, chunked writes and HTTP/1.1 added; final suite passed. Earlier connection resets retained as observed transport failures; root cause not independently established.",
+  "source_files": {
+    "server.py": "8a4d8b7a02504634a7a1a23907c544d6ae6832616df044e0a38f1141d0ae0e90",
+    "app.js": "20521e242461ca6ad2f5120c439d1d89478911a9ab4732c5f303d72136e39fd5",
+    "styles.css": "398506e353148153771e69d719a7409499460390fdbb9bc75fe016ce57c01dac",
+    "index.html": "6e7bd7e39948a89d64069fca09344b86aa7dcf0ddc6bdf7f6f13f5fa8390ff21",
+    "test_directory.py": "b27cc4a924c266cb89382da4e61fb623f10797bba58c51a123767297aa37fd8b"
+  },
+  "published_corpus_complete": false
+}

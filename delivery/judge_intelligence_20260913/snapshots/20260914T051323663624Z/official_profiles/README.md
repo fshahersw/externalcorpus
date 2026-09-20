@@ -1,0 +1,15 @@
+# Official judge profiles from saved sources
+
+This offline package contains **1,978 source-specific person observations** from **63 of the 145 saved sources**, covering **16 states**. It is not a count of unique people or current judges. The same person can appear in different sources or court assignments; identities have not been merged.
+
+There are **15,171 evidence-linked facts**, including literal appointment, education and service statements. **503 observations** contain professional narrative facts and **608** include published court/office contact fields. All 363 existing Texas assignments and all eight saved individual profiles were retained.
+
+Use `profiles.jsonl` or `profiles.csv` for person observations. Each record includes source URL, capture times, edition note, original/text paths and hashes, facts and limitations. `facts.jsonl` and `facts.csv` contain one fact per row with its evidence. Evidence points to a captured HTML XPath, original XLSX cell, or a field in the hashed source manifest. HTML quotations preserve source characters after entity decoding and whitespace normalization.
+
+`source_coverage.jsonl` / `.csv` account for every one of the 145 sources. `state_coverage.jsonl` / `.csv` cover all 50 states plus DC. `gaps.jsonl` / `.csv` make partial normalization explicit. `rejected_candidates.jsonl` preserves ambiguous names, multiple-person cells, vacancies and non-person headings without promoting them to profiles. Unparsed PDFs, other unsupported roster layouts and directory-only pages remain available at the original paths. No source was fetched or changed for this package.
+
+Biographical statements are literal excerpts from the named person's block. Categories organize those statements; dates, degrees, institutions and identity matches have not been inferred. Iowa cards can be truncated, so incomplete trailing sentences are excluded. Utah cards commonly provide names/roles and an observed biography link; the linked biographies were not downloaded here. Court Email identifies an office/court address, not a personal email.
+
+Alabama's tables include historical service beginning in 1820. Their stated begin/end values are retained, including the literal label Present. Other records keep current/historical status unresolved. Capture dates do not establish that the reported office or biography is current.
+
+The repeatable offline builder is `scripts/build_official_judge_profiles.py` in the workspace root. Run it with Python containing lxml and openpyxl, then run `scripts/validate_official_judge_profiles.py` to reconcile the persisted exports and refresh the coverage report. Both write only this new output folder. Paths are relative to `C:/Users/firas/Downloads/SCRAPE`; retain the referenced `sources` and `corpus` directories with this metadata. `validation.json` records checks of all 293 artifact hashes, all fact values/evidence locations, Texas cell values, negative controls and unchanged original package files. `semantic_regressions.json` records the source-linked checks for the audited name and narrative corrections. Validation reported zero issues.

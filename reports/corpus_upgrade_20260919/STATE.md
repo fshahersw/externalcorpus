@@ -368,3 +368,19 @@ Round 9 (2026-09-20, open-source enrichment, done without sub-agents):
   private keys anywhere. Logs: reports/hosting_plan_20260920/secret_scan_tree.log and secret_hits_explained.log.
 - 12:15Z collector for source_directory_documents ended (time budget; 999 saved, 291 pending). Rebuilt its index and the citation
   index (946 new documents; 25,235 scanned, 60,616 authorities, 0 failures). Live verifier 83/83.
+
+## Update (2026-09-20 ~20:40Z) — GitHub transfer complete and verified
+- Release upload finished: 94 of 94 units, 0 held, 0 failed; 130.21 GB raw -> 85.88 GB packed in 746 parts across releases
+  `data-20260920` and `data-20260920-courtdocs`. `tools/verify_release.py`: every part present, size equal, and GitHub's own SHA-256
+  digest equals the manifest for all 746. One superseded asset is left on the release (`top_level_files-8727d8.tar.p001`, the older
+  copy of the loose top-level files); the owner can delete it.
+- The repository was switched back to PUBLIC by the owner during the upload. Pass 2 therefore held 15 units flagged restricted
+  (docket-vendor material); the owner instructed "do not hold anything back", so pass 3 ran with `--include-restricted`. All of those
+  units had already been uploaded while the repository was private; only two had changed. While the repository is public, every
+  release asset (including the vendor-derived ones) can be downloaded by anyone.
+- Owner added loose files to the project root on 2026-09-20 (CRS reports, reginfo PRA inventory XML 105 MB, CSV/XLS exports); they are
+  in the `(top-level files)` unit. `.gitignore` now ignores loose top-level files except code and write-ups (GitHub's 100 MB limit
+  rejected a push that had swept them in). Owner also uploaded `externalcorpus-workbench-upgrade.zip` through the GitHub website;
+  it is in git history and was kept (rebased on top of it, no force push).
+- Code head: see `git log`; data_manifest.json is committed. Refresh later: `python tools/push_data.py push [--include-restricted]`,
+  then `python tools/verify_release.py`.
